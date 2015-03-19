@@ -106,17 +106,32 @@ namespace tanaka_733.OpenForPSCmdlet
             if (!File.Exists(outputPath))
                 return;
             var dir = Directory.GetParent(outputPath).ToString();
-            var p = new System.Diagnostics.Process
+            try
             {
-                StartInfo = new ProcessStartInfo
+                var p = new System.Diagnostics.Process
                 {
-                    FileName = @"C:\Windows\system32\WindowsPowerShell\v1.0\powershell.exe",
-                    WorkingDirectory = dir,
-                    Arguments = $"-NoExit -Command \"& {{Import-Module '{outputPath}'}}\""
-                }
-            };
-            p.Start();
+                    StartInfo = new ProcessStartInfo
+                    {
+                        FileName = @"C:\Windows\system32\WindowsPowerShell\v1.0\powershell.exe",
+                        WorkingDirectory = dir,
+                        Arguments = $"-NoExit -Command \"& {{Import-Module '{outputPath}'}}\""
+                    }
+                };
+                p.Start();
 
+                var dteProcess = DTE.Debugger.LocalProcesses.Cast<EnvDTE.Process>().FirstOrDefault(prop => prop.ProcessID == p.Id);
+
+                if (dteProcess != null)
+                {
+                    dteProcess.Attach();
+                    DTE.Debugger.CurrentProcess = dteProcess;
+                }
+            }
+            catch (Exception)
+            {
+                //TODO log
+            }
+            
             // Show a Message Box to prove we were here
             //IVsUIShell uiShell = (IVsUIShell)GetService(typeof(SVsUIShell));
             //Guid clsid = Guid.Empty;
