@@ -88,7 +88,9 @@
  
   </Commands>
 
-
+  <KeyBindings>
+    <KeyBinding guid="guidOpenForPSCmdletCmdSet" id="cmdidOpenForPSCmdletCommand" editor="guidVSStd97" key1="VK_F7" mod1="CONTROL SHIFT"/>
+  </KeyBindings>
 
 
 
