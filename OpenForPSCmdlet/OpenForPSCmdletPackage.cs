@@ -12,6 +12,7 @@ using System.IO;
 using EnvDTE80;
 using EnvDTE;
 using System.Linq;
+using Process = System.Diagnostics.Process;
 
 namespace tanaka_733.OpenForPSCmdlet
 {
@@ -90,6 +91,8 @@ namespace tanaka_733.OpenForPSCmdlet
         }
         #endregion
 
+        private int? processId;
+
         /// <summary>
         /// This function is the callback used to execute a command when the a menu item is clicked.
         /// See the Initialize method to see how the menu item is associated to this function using
@@ -106,6 +109,22 @@ namespace tanaka_733.OpenForPSCmdlet
             if (!File.Exists(outputPath))
                 return;
             var dir = Directory.GetParent(outputPath).ToString();
+
+            if (processId.HasValue)
+            {
+                try
+                {
+                    var p = Process.GetProcessById(processId.Value);
+                    p.CloseMainWindow();
+                    p.WaitForExit(5000);
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine("Failed to kill previous powershell process.");
+                    Debug.WriteLine(ex);
+                }
+            }
+
             try
             {
                 var p = new System.Diagnostics.Process
@@ -118,8 +137,9 @@ namespace tanaka_733.OpenForPSCmdlet
                     }
                 };
                 p.Start();
+                processId = p.Id;
 
-                var dteProcess = DTE.Debugger.LocalProcesses.Cast<EnvDTE.Process>().FirstOrDefault(prop => prop.ProcessID == p.Id);
+                var dteProcess = DTE.Debugger.LocalProcesses.Cast<EnvDTE.Process>().FirstOrDefault(prop => prop.ProcessID == processId);
 
                 if (dteProcess != null)
                 {
@@ -127,27 +147,12 @@ namespace tanaka_733.OpenForPSCmdlet
                     DTE.Debugger.CurrentProcess = dteProcess;
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                //TODO log
+                ActivityLog.LogError("OpenForPSCmdlet", $@"Failed to launch powershell
+{ex.Message}
+{ex.StackTrace}");
             }
-            
-            // Show a Message Box to prove we were here
-            //IVsUIShell uiShell = (IVsUIShell)GetService(typeof(SVsUIShell));
-            //Guid clsid = Guid.Empty;
-            //int result;
-            //Microsoft.VisualStudio.ErrorHandler.ThrowOnFailure(uiShell.ShowMessageBox(
-            //           0,
-            //           ref clsid,
-            //           "OpenForPSCmdlet",
-            //           string.Format(CultureInfo.CurrentCulture, "Inside {0}.MenuItemCallback()", this.ToString()),
-            //           string.Empty,
-            //           0,
-            //           OLEMSGBUTTON.OLEMSGBUTTON_OK,
-            //           OLEMSGDEFBUTTON.OLEMSGDEFBUTTON_FIRST,
-            //           OLEMSGICON.OLEMSGICON_INFO,
-            //           0,        // false
-            //           out result));
         }
 
         static string GetOutputPath(Project proj)
