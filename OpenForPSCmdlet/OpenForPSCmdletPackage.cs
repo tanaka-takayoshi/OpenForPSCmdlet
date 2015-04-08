@@ -151,7 +151,7 @@ namespace tanaka_733.OpenForPSCmdlet
             {
                 ActivityLog.LogError("OpenForPSCmdlet", string.Format(@"Failed to launch powershell
 {0}
-{1}"), ex.Message, ex.StackTrace);
+{1}", ex.Message, ex.StackTrace));
             }
         }
 
