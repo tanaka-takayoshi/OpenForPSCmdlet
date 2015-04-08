@@ -133,7 +133,7 @@ namespace tanaka_733.OpenForPSCmdlet
                     {
                         FileName = @"C:\Windows\system32\WindowsPowerShell\v1.0\powershell.exe",
                         WorkingDirectory = dir,
-                        Arguments = $string.Format("-NoExit -Command \"& {{Import-Module '{0}'}}\"", outputPath)
+                        Arguments = string.Format("-NoExit -Command \"& {{Import-Module '{0}'}}\"", outputPath)
                     }
                 };
                 p.Start();
