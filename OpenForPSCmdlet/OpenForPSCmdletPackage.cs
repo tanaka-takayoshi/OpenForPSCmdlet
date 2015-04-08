@@ -133,7 +133,7 @@ namespace tanaka_733.OpenForPSCmdlet
                     {
                         FileName = @"C:\Windows\system32\WindowsPowerShell\v1.0\powershell.exe",
                         WorkingDirectory = dir,
-                        Arguments = $"-NoExit -Command \"& {{Import-Module '{outputPath}'}}\""
+                        Arguments = $string.Format("-NoExit -Command \"& {{Import-Module '{0}'}}\"", outputPath)
                     }
                 };
                 p.Start();
@@ -149,9 +149,9 @@ namespace tanaka_733.OpenForPSCmdlet
             }
             catch (Exception ex)
             {
-                ActivityLog.LogError("OpenForPSCmdlet", $@"Failed to launch powershell
-{ex.Message}
-{ex.StackTrace}");
+                ActivityLog.LogError("OpenForPSCmdlet", string.Format(@"Failed to launch powershell
+{0}
+{1}"), ex.Message, ex.StackTrace);
             }
         }
 
